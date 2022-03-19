@@ -1,0 +1,7 @@
+{% if nav_list %}
+<ul>
+    {% for item in nav_list %}
+    <li><a href="{{item['link']}}">{{ item['name'] }}</a></li>
+    {% endfor %}
+</ul>
+{% endif %}
