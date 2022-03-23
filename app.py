@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, Response, jsonify
 import requests
 import json
+import os
 
 app = Flask(__name__)
 
@@ -21,11 +22,11 @@ def about():
 
 @app.route("/fetch")
 def fetch():
-    if request.args.get('pass') != 'pass':
+    if request.args.get('pass') != os.environ['passwd']:
         print(request.args.get('pass'))
         return Response(status=403)
     trending_devs = requests.get('https://gh-trending-api.herokuapp.com/developers')
-    existing_devs = requests.get('https://api.sheety.co/39d37f14ef4edbd7f56fecb81e0f81ca/githubDev/devsite')
+    existing_devs = requests.get(os.environ['SHEETY_API'])
     for item in trending_devs.json():
         dev = item['username']
         if dev not in [i['handle'] for i in existing_devs.json()['devsite']]:
@@ -39,9 +40,13 @@ def fetch():
                 dic['site'] = 'https://' + dev_details.json()['blog'] if (dev_details.json()['blog'].count('https://') == 0 and dev_details.json()['blog'].count('http://')==0) else dev_details.json()['blog']
                 dic['profile'] = dev_details.json()['html_url']
                 dic['handle'] = dev
-                post_response = requests.post('https://api.sheety.co/39d37f14ef4edbd7f56fecb81e0f81ca/githubDev/devsite', data=json.dumps({'devsite': dic}), headers={'Content-type': 'application/json'})
+                post_response = requests.post(os.environ['SHEETY_API'], data=json.dumps({'devsite': dic}), headers={'Content-type': 'application/json'})
                 print(post_response.json())
     return Response(status=200)
+
+@app.route("/environ")
+def environ():
+    return 'No environ'
 
 if __name__ == "__main__":
     app.run()
