@@ -13,7 +13,7 @@ navlist = [{"name": "Home", "link": "/"}, {"name": "About", "link": "/about"}]
 
 @app.route("/")
 def index():
-    response = requests.get('https://api.sheety.co/39d37f14ef4edbd7f56fecb81e0f81ca/githubDev/devsite')
+    response = requests.get(os.environ['SHEETY_API'])
     return render_template('home.html', title="Home", nav_list=navlist, dev_list=response.json()['devsite'])
 
 @app.route("/about")
