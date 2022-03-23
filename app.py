@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, Response
 import requests
 
 app = Flask(__name__)
@@ -14,10 +14,11 @@ def hello_world():
     response = requests.get('https://api.sheety.co/39d37f14ef4edbd7f56fecb81e0f81ca/githubDev/devsite')
     return render_template('home.html', title="Home", nav_list=navlist, dev_list=response.json()['devsite'])
 
-@app.route("/fetch", methods=['POST'])
+@app.route("/fetch")
 def fetch():
-    print(request.json)
-    return 200
+    response = requests.get('https://gh-trending-api.herokuapp.com/developers')
+    print(response.json())
+    return Response(status=200)
 
 if __name__ == "__main__":
     app.run()
