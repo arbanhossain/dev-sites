@@ -1,7 +1,5 @@
-body {
-    margin: 2.5em;
-}
-
 .list {
     text-align: left !important;
+    margin-top: 2.5em;
+    max-width: 1000px;
 }
