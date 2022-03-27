@@ -1,7 +1,8 @@
 {% if nav_list %}
-<ul>
+<ul class="nav_ul">
     {% for item in nav_list %}
-    <li><a href="{{item['link']}}">{{ item['name'] }}</a></li>
+    <li class="nav_li"><a href="{{item['link']}}">{{ item['name'] }}</a></li>
     {% endfor %}
 </ul>
 {% endif %}
+<hr>
