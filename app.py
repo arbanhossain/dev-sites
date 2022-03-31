@@ -25,12 +25,12 @@ def fetch():
     if request.args.get('pass') != os.environ['passwd']:
         print(request.args.get('pass'))
         return Response(status=403)
-    trending_devs = requests.get('https://gh-trending-api.herokuapp.com/developers')
+    trending_devs = requests.get('https://ghtrendingapi.herokuapp.com/developers')
     existing_devs = requests.get(os.environ['SHEETY_API'])
     for item in trending_devs.json():
         dev = item['username']
         if dev not in [i['handle'] for i in existing_devs.json()['devsite']]:
-            dev_details = requests.get('https://api.github.com/users/' + dev)
+            dev_details = requests.get('https://api.github.com/users/' + dev, headers={'Authorization': f"Bearer {os.environ['GITHUB_TOKEN']}"})
             if 'message' in dev_details.json():
                 return Response(dev_details.json()['message'], status=500)
             if dev_details.json()['blog'] == '': pass
