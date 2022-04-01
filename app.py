@@ -1,7 +1,12 @@
 from flask import Flask, render_template, request, Response, jsonify
+
+import firebase_admin
 import requests
 import json
 import os
+
+from firebase_admin import firestore
+from firebase_admin import credentials
 
 app = Flask(__name__)
 
@@ -11,10 +16,16 @@ navlist = [{"name": "Home", "link": "/"}, {"name": "About", "link": "/about"}]
 #     {"name": "Nabil", "profile": "https://github.com/nirobnabil"}
 # ]
 
+cred = credentials.Certificate(requests.get(os.environ['GOOGLE_APPLICATION_CREDENTIALS']).json())
+firebase_admin.initialize_app(cred)
+db = firestore.client()
+sites_ref = db.collection('devsite')
+
 @app.route("/")
 def index():
-    response = requests.get(os.environ['SHEETY_API'])
-    return render_template('home.html', title="Home", nav_list=navlist, dev_list=response.json()['devsite'])
+    docs = sites_ref.stream()
+    dev_list = [doc.to_dict() for doc in docs]
+    return render_template('home.html', title="Home", nav_list=navlist, dev_list=dev_list)
 
 @app.route("/about")
 def about():
@@ -26,10 +37,11 @@ def fetch():
         print(request.args.get('pass'))
         return Response(status=403)
     trending_devs = requests.get('https://ghtrendingapi.herokuapp.com/developers')
-    existing_devs = requests.get(os.environ['SHEETY_API'])
+    docs = sites_ref.stream()
+    existing_devs = [doc.to_dict() for doc in docs]
     for item in trending_devs.json():
         dev = item['username']
-        if dev not in [i['handle'] for i in existing_devs.json()['devsite']]:
+        if dev not in [i['handle'] for i in existing_devs]:
             dev_details = requests.get('https://api.github.com/users/' + dev, headers={'Authorization': f"Bearer {os.environ['GITHUB_TOKEN']}"})
             if 'message' in dev_details.json():
                 return Response(dev_details.json()['message'], status=500)
@@ -40,8 +52,8 @@ def fetch():
                 dic['site'] = 'https://' + dev_details.json()['blog'] if (dev_details.json()['blog'].count('https://') == 0 and dev_details.json()['blog'].count('http://')==0) else dev_details.json()['blog']
                 dic['profile'] = dev_details.json()['html_url']
                 dic['handle'] = dev
-                post_response = requests.post(os.environ['SHEETY_API'], data=json.dumps({'devsite': dic}), headers={'Content-type': 'application/json'})
-                print(post_response.json())
+                doc_ref = sites_ref.document(dev)
+                doc_ref.set(dic)
     return Response(status=200)
 
 @app.route("/environ")
