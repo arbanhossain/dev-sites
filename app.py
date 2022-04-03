@@ -25,7 +25,7 @@ sites_ref = db.collection('devsite')
 def index():
     docs = sites_ref.stream()
     dev_list = [doc.to_dict() for doc in docs]
-    return render_template('home.html', title="Home", nav_list=navlist, dev_list=dev_list)
+    return render_template('home.html', title="Home", nav_list=navlist, dev_list=dev_list, total=len(dev_list))
 
 @app.route("/about")
 def about():
