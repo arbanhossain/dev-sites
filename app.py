@@ -36,7 +36,7 @@ def fetch():
     if request.args.get('pass') != os.environ['passwd']:
         print(request.args.get('pass'))
         return Response(status=403)
-    trending_devs = requests.get('https://ghtrendingapi.herokuapp.com/developers')
+    trending_devs = requests.get('https://ghtrendingapidocker.onrender.com/developers')
     docs = sites_ref.stream()
     existing_devs = [doc.to_dict() for doc in docs]
     for item in trending_devs.json():
